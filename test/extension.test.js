@@ -1,15 +1,16 @@
 const assert = require('assert');
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 const vscode = require('vscode');
-// const myExtension = require('../extension');
+const azureDevOps = require('../src/services/azureDevOps');
 
 suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+    vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
-	});
+    test('AzureDevOps Service - Pull Tickets', async () => {
+        try {
+            await azureDevOps.pullTickets();
+            assert.ok(true, 'Tickets pulled successfully');
+        } catch (error) {
+            assert.fail('Should not throw error');
+        }
+    });
 });
