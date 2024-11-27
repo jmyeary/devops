@@ -1,15 +1,21 @@
-┃                                                                       Project Development Plan                                                                        ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+# Project Development Plan
 
-                                                                1. Overview of the Solution Architecture
+---
 
- • VS Code Extension (Frontend): The extension serves as the interface within VS Code, allowing you to interact with Azure DevOps and the Language Model (LLM).
- • Python Backend Scripts: The extension communicates with Python scripts that handle tasks such as interacting with Azure DevOps APIs and the LLM.
- • Communication Mechanism: Utilize VS Code's ability to execute external scripts, ensuring seamless interaction between the extension and Python scripts.
- • Azure DevOps Integration: Use Azure DevOps REST APIs in Python to interact with tickets, updates, and task creation.
- • LLM Integration: Use a Python library (e.g., OpenAI's openai package) to interact with the LLM for code generation and summarization.
+## 1. Overview of the Solution Architecture
 
-─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+- **VS Code Extension (Frontend)**: 
+  - Serves as the interface within Visual Studio Code, allowing interaction with Azure DevOps and the Language Model (LLM).
+- **Python Backend Scripts**: 
+  - The extension communicates with Python scripts that handle tasks such as interacting with Azure DevOps APIs and the LLM.
+- **Communication Mechanism**: 
+  - Utilizes VS Code's ability to execute external scripts, ensuring seamless interaction between the extension and Python scripts.
+- **Azure DevOps Integration**: 
+  - Uses Azure DevOps REST APIs in Python to interact with tickets, updates, and task creation.
+- **LLM Integration**: 
+  - Uses a Python library to interact with the LLM for code generation and summarization.
+
+---
                                                                    2. Steps to Implement the Solution
 
                                                                       a. Set Up the Python Backend
