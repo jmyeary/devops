@@ -1,331 +1,416 @@
-### **1. Overview of the Solution Architecture**
+┃                                                                       Project Development Plan                                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-- **VS Code Extension (Frontend):** The extension will be the interface within VS Code, allowing you to interact with Azure DevOps and the LLM.
-- **Python Backend Scripts/Service:** Since VS Code extensions are typically developed using TypeScript/JavaScript, we'll use the extension to communicate with Python scripts that handle the heavy lifting.
-- **Communication Mechanism:** Use VS Code's ability to execute external scripts or set up a local server for communication between the extension and Python backend.
-- **Azure DevOps Integration:** Utilize Azure DevOps REST APIs in Python to interact with tickets, updates, and task creation.
-- **LLM Integration:** Use a Python library or API to interact with the LLM for code generation and summarization.
+                                                                1. Overview of the Solution Architecture
 
----
+ • VS Code Extension (Frontend): The extension serves as the interface within VS Code, allowing you to interact with Azure DevOps and the Language Model (LLM).
+ • Python Backend Scripts: The extension communicates with Python scripts that handle tasks such as interacting with Azure DevOps APIs and the LLM.
+ • Communication Mechanism: Utilize VS Code's ability to execute external scripts, ensuring seamless interaction between the extension and Python scripts.
+ • Azure DevOps Integration: Use Azure DevOps REST APIs in Python to interact with tickets, updates, and task creation.
+ • LLM Integration: Use a Python library (e.g., OpenAI's openai package) to interact with the LLM for code generation and summarization.
 
-### **2. Steps to Implement the Solution**
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                   2. Steps to Implement the Solution
 
-#### **a. Set Up the VS Code Extension**
+                                                                      a. Set Up the Python Backend
 
-1. **Initialize the Extension:**
-   - Use `yo code` to bootstrap a new VS Code extension in JavaScript.
-   - Select JavaScript when prompted to choose the language.
+ 1 Create Python Scripts:
+    • pull_tickets.py to fetch tickets assigned to you.
+    • generate_code.py to generate code from ticket descriptions using the LLM.
+    • update_ticket.py to update tickets with progress or completion status.
+    • create_work_items.py to create new work items from given requirements.
+ 2 Set Up Python Environment:
+    • Navigate to the python/ directory.
+    • Create a virtual environment and activate it:
+      
+       cd python
+       python -m venv venv
+       source venv/bin/activate  # On Windows: `venv\Scripts\activate`
+      
+    • Install the necessary Python packages:
+      
+       pip install -r requirements.txt
+      
+ 3 Configure Authentication:
+    • Azure DevOps:
+       • Create azure_config.py (ensure it's excluded from version control).
+       • Use environment variables to store your Azure DevOps organization URL and personal access token (PAT).
 
-2. **Create Commands in `package.json`:**
-   - Define commands for:
-     - Pulling tickets assigned to you.
-     - Generating code based on a ticket.
-     - Updating tickets.
-     - Creating new features, user stories, and tasks.
+          # azure_config.py
+          import os
 
-   ```json
-   // package.json
-   {
-     "contributes": {
-       "commands": [
-         {
-           "command": "extension.pullTickets",
-           "title": "Pull My Tickets"
-         },
-         {
-           "command": "extension.generateCode",
-           "title": "Generate Code from Ticket"
-         },
-         {
-           "command": "extension.updateTicket",
-           "title": "Update Ticket with Changes"
-         },
-         {
-           "command": "extension.createWorkItems",
-           "title": "Create Work Items from Requirements"
-         }
-       ]
-     }
-   }
-   ```
+          ORGANIZATION_URL = os.getenv('AZURE_DEVOPS_ORGANIZATION_URL')
+          PERSONAL_ACCESS_TOKEN = os.getenv('AZURE_DEVOPS_PAT')
 
-3. **Implement Command Placeholders:**
-   - In `extension.js`, set up command registrations that will invoke the Python scripts.
+    • OpenAI API:
+       • Create openai_config.py (also excluded from version control).
+       • Use environment variables to store your OpenAI API key.
 
-   ```javascript
-   // extension.js
-   const vscode = require('vscode');
-   const { exec } = require('child_process');
+          # openai_config.py
+          import os
 
-   function activate(context) {
-     let pullTickets = vscode.commands.registerCommand('extension.pullTickets', function () {
-       exec('python pull_tickets.py', callbackFunction);
-     });
+          OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
-     let generateCode = vscode.commands.registerCommand('extension.generateCode', function () {
-       exec('python generate_code.py', callbackFunction);
-     });
 
-     let updateTicket = vscode.commands.registerCommand('extension.updateTicket', function () {
-       exec('python update_ticket.py', callbackFunction);
-     });
+                                                              b. Implement Functionality in Python Scripts
 
-     let createWorkItems = vscode.commands.registerCommand('extension.createWorkItems', function () {
-       exec('python create_work_items.py', callbackFunction);
-     });
-
-     context.subscriptions.push(pullTickets, generateCode, updateTicket, createWorkItems);
-   }
-
-   function deactivate() {}
-
-   module.exports = {
-     activate,
-     deactivate
-   };
-   ```
-
-#### **b. Develop Python Backend Scripts**
-
-1. **Set Up a Virtual Environment:**
-   - Create a virtual environment and install necessary packages.
+ 1 pull_tickets.py:
+    • Implement the get_my_work_items() function to fetch tickets assigned to the current user using the Azure DevOps API.
+    • Output the tickets in a format that can be parsed or displayed by the extension.
    
-     ```bash
-     python -m venv venv
-     source venv/bin/activate
-     pip install azure-devops azure-identity openai
-     ```
-
-2. **Authenticate with Azure DevOps:**
-   - Create a `azure_config.py` file containing authentication details.
+    # pull_tickets.py
+    from azure.devops.connection import Connection
+    from msrest.authentication import BasicAuthentication
+    import azure_config
+    import json
    
-     ```python
-     # azure_config.py
-     ORGANIZATION_URL = 'https://dev.azure.com/your_organization'
-     PERSONAL_ACCESS_TOKEN = 'your_pat_token'
-     ```
-
-3. **Script to Pull Tickets Assigned to You:**
-
-   ```python
-   # pull_tickets.py
-   from azure.devops.connection import Connection
-   from msrest.authentication import BasicAuthentication
-   import azure_config
-
-   def get_my_work_items():
-       credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
-       connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
-       work_item_tracking = connection.clients.get_work_item_tracking_client()
-       # Replace 'assigned-to-me-query-id' with your actual query ID
-       query_result = work_item_tracking.query_by_id('assigned-to-me-query-id')
-       print(query_result)
-
-   if __name__ == "__main__":
-       get_my_work_items()
-   ```
-
-4. **Script to Generate Code Using LLM:**
-
-   ```python
-   # generate_code.py
-   import openai
-
-   def generate_code_from_ticket(ticket_details):
-       openai.api_key = 'your_openai_api_key'
-       prompt = f"Write code in Python to implement the following requirement:\n{ticket_details}"
-       response = openai.Completion.create(
-           engine='text-davinci-003',
-           prompt=prompt,
-           max_tokens=150
-       )
-       code = response.choices[0].text.strip()
-       # Output the generated code to a file or VS Code editor
-       print(code)
-
-   if __name__ == "__main__":
-       # Assume ticket_details are passed or fetched appropriately
-       ticket_details = "Example ticket details go here."
-       generate_code_from_ticket(ticket_details)
-   ```
-
-5. **Script to Update Tickets with Changes:**
-
-   ```python
-   # update_ticket.py
-   from azure.devops.connection import Connection
-   from msrest.authentication import BasicAuthentication
-   import azure_config
-
-   def update_ticket(work_item_id, update_message):
-       credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
-       connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
-       wit_client = connection.clients.get_work_item_tracking_client()
-       update = [{
-           "op": "add",
-           "path": "/fields/System.History",
-           "value": update_message
-       }]
-       wit_client.update_work_item(document=update, id=work_item_id)
-       print(f"Work item {work_item_id} updated.")
-
-   if __name__ == "__main__":
-       # Assume work_item_id and update_message are provided
-       work_item_id = 123
-       update_message = "Implemented feature X as per the ticket requirements."
-       update_ticket(work_item_id, update_message)
-   ```
-
-6. **Script to Create Work Items from Requirements:**
-
-   ```python
-   # create_work_items.py
-   from azure.devops.connection import Connection
-   from msrest.authentication import BasicAuthentication
-   import openai
-   import azure_config
-
-   def create_work_items_from_requirements(requirements):
-       # Use LLM to break down requirements
-       openai.api_key = 'your_openai_api_key'
-       prompt = f"Break down the following requirements into features, user stories, and tasks:\n{requirements}"
-       response = openai.Completion.create(
-           engine='text-davinci-003',
-           prompt=prompt,
-           max_tokens=500
-       )
-       breakdown = response.choices[0].text.strip()
-       # Parse the breakdown into work items
-       # ... (parsing logic)
-       # Create work items in Azure DevOps
-       credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
-       connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
-       wit_client = connection.clients.get_work_item_tracking_client()
-       # ... (creation logic)
-       print("Work items created based on the requirements.")
-
-   if __name__ == "__main__":
-       requirements = "User should be able to upload files and view upload history."
-       create_work_items_from_requirements(requirements)
-   ```
-
-#### **c. Enhance Communication Between Extension and Python Scripts**
-
-1. **Implement Input and Output Handling:**
-   - Modify the JavaScript commands to pass inputs to Python scripts and handle outputs.
+    def get_my_work_items():
+        credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
+        connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
+        wit_client = connection.clients.get_work_item_tracking_client()
+        query = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.AssignedTo] = @Me AND [System.State] <> 'Closed'"
+        work_items = wit_client.query_by_wiql(wiql={'query': query}).work_items
    
-   ```javascript
-   // extension.js
-   function executePythonScript(scriptName, args, callback) {
-     const command = `python ${scriptName} ${args.join(' ')}`;
-     exec(command, (error, stdout, stderr) => {
-       if (error) {
-         vscode.window.showErrorMessage(`Error: ${stderr}`);
-         return;
-       }
-       callback(stdout);
-     });
-   }
+        items = []
+        for item_ref in work_items:
+            item = wit_client.get_work_item(item_ref.id)
+            items.append({
+                'id': item.id,
+                'title': item.fields['System.Title']
+            })
+        print(json.dumps(items))
+   
+    if __name__ == "__main__":
+        get_my_work_items()
+   
+ 2 generate_code.py:
+    • Implement the generate_code(ticket_description) function to interact with the LLM and generate code based on a ticket description.
+    • Handle input arguments safely and ensure proper communication with the LLM.
+   
+    # generate_code.py
+    import sys
+    import openai
+    import openai_config
+    import json
+   
+    def generate_code(ticket_description):
+        openai.api_key = openai_config.OPENAI_API_KEY
+        prompt = f"Generate Python code to accomplish the following task:\n{ticket_description}"
+        response = openai.Completion.create(
+            engine='text-davinci-003',
+            prompt=prompt,
+            max_tokens=150,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        code = response.choices[0].text.strip()
+        print(code)
+   
+    if __name__ == "__main__":
+        if len(sys.argv) < 2:
+            print("Usage: generate_code.py '<ticket_description>'")
+            sys.exit(1)
+        ticket_description = sys.argv[1]
+        generate_code(ticket_description)
+   
+ 3 update_ticket.py:
+    • Implement the update_ticket(ticket_id, update_message) function to update a specific ticket in Azure DevOps.
+    • Accept command-line arguments for the ticket ID and update message.
+   
+    # update_ticket.py
+    import sys
+    from azure.devops.connection import Connection
+    from msrest.authentication import BasicAuthentication
+    import azure_config
+   
+    def update_ticket(ticket_id, update_message):
+        credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
+        connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
+        wit_client = connection.clients.get_work_item_tracking_client()
+        update = [{
+            "op": "add",
+            "path": "/fields/System.History",
+            "value": update_message
+        }]
+        wit_client.update_work_item(document=update, id=int(ticket_id))
+        print(f"Ticket {ticket_id} updated successfully.")
+   
+    if __name__ == "__main__":
+        if len(sys.argv) < 3:
+            print("Usage: update_ticket.py <ticket_id> '<update_message>'")
+            sys.exit(1)
+        ticket_id = sys.argv[1]
+        update_message = sys.argv[2]
+        update_ticket(ticket_id, update_message)
+   
+ 4 create_work_items.py:
+    • Implement the create_work_items(requirements) function to break down requirements into tasks using the LLM and create work items in Azure DevOps.
+   
+    # create_work_items.py
+    import sys
+    from azure.devops.connection import Connection
+    from msrest.authentication import BasicAuthentication
+    import openai
+    import azure_config
+    import openai_config
+   
+    def create_work_items(requirements):
+        openai.api_key = openai_config.OPENAI_API_KEY
+        prompt = f"Break down the following requirements into a list of tasks:\n{requirements}"
+        response = openai.Completion.create(
+            engine='text-davinci-003',
+            prompt=prompt,
+            max_tokens=500,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        tasks_text = response.choices[0].text.strip()
+        tasks = [task.strip('- ').strip() for task in tasks_text.split('\n') if task.strip()]
+   
+        credentials = BasicAuthentication('', azure_config.PERSONAL_ACCESS_TOKEN)
+        connection = Connection(base_url=azure_config.ORGANIZATION_URL, creds=credentials)
+        wit_client = connection.clients.get_work_item_tracking_client()
+        project_name = 'YourProjectName'  # Replace with your actual project name
+   
+        for task in tasks:
+            work_item = [{
+                "op": "add",
+                "path": "/fields/System.Title",
+                "value": task
+            }]
+            created_item = wit_client.create_work_item(document=work_item, project=project_name, type='Task')
+            print(f"Created Task ID: {created_item.id} - Title: {created_item.fields['System.Title']}")
+   
+    if __name__ == "__main__":
+        if len(sys.argv) < 2:
+            print("Usage: create_work_items.py '<requirements>'")
+            sys.exit(1)
+        requirements = sys.argv[1]
+        create_work_items(requirements)
+   
 
-   // Example usage in a command
-   let generateCode = vscode.commands.registerCommand('extension.generateCode', function () {
-     vscode.window.showInputBox({ prompt: 'Enter Ticket ID' }).then(ticketId => {
-       executePythonScript('generate_code.py', [ticketId], (output) => {
-         // Display the generated code in a new editor
-         vscode.workspace.openTextDocument({ content: output, language: 'python' }).then(doc => {
-           vscode.window.showTextDocument(doc);
-         });
-       });
-     });
-   });
-   ```
+                                                           c. Integrate Extension Commands with Python Scripts
 
-2. **Pass Data Between Scripts:**
-   - Update Python scripts to accept command-line arguments and output results.
+ 1 Update src/commands/index.js:
+    • Implement functions for each command that execute the corresponding Python scripts.
+    • Handle user input and display outputs appropriately.
+   
+    // src/commands/index.js
+    const vscode = require('vscode');
+    const { exec } = require('child_process');
+    const path = require('path');
+   
+    function executePythonScript(scriptName, args = [], callback) {
+        const scriptPath = path.join(__dirname, '..', '..', 'python', scriptName);
+        const command = `python "${scriptPath}" ${args.join(' ')}`;
+   
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                vscode.window.showErrorMessage(`Error: ${stderr.trim()}`);
+                console.error(stderr);
+                return;
+            }
+            callback(stdout.trim());
+        });
+    }
+   
+    async function pullTickets() {
+        executePythonScript('pull_tickets.py', [], (output) => {
+            try {
+                const tickets = JSON.parse(output);
+                const items = tickets.map(ticket => `${ticket.id}: ${ticket.title}`);
+                vscode.window.showQuickPick(items, { canPickMany: false, placeHolder: 'Select a ticket' })
+                    .then(selected => {
+                        if (selected) {
+                            vscode.window.showInformationMessage(`You selected: ${selected}`);
+                        }
+                    });
+            } catch (err) {
+                vscode.window.showErrorMessage('Failed to parse tickets.');
+            }
+        });
+    }
+   
+    async function generateCode() {
+        const ticketDescription = await vscode.window.showInputBox({ prompt: 'Enter Ticket Description' });
+        if (!ticketDescription) {
+            vscode.window.showErrorMessage('Ticket description is required.');
+            return;
+        }
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: 'Generating code from ticket...',
+            cancellable: false
+        }, (progress) => {
+            return new Promise((resolve) => {
+                executePythonScript('generate_code.py', [JSON.stringify(ticketDescription)], (output) => {
+                    vscode.workspace.openTextDocument({ content: output, language: 'python' }).then(doc => {
+                        vscode.window.showTextDocument(doc);
+                    });
+                    resolve();
+                });
+            });
+        });
+    }
+   
+    // Implement updateTicket and createWorkItems similarly...
+   
+    module.exports = {
+        pullTickets,
+        generateCode,
+        // updateTicket,
+        // createWorkItems
+    };
+   
+ 2 Register Commands in src/extension.js:
+   
+    // src/extension.js
+    const vscode = require('vscode');
+    const commands = require('./commands');
+   
+    function activate(context) {
+        console.log('Extension "ado-ai" is now active.');
+   
+        let pullTickets = vscode.commands.registerCommand('extension.pullTickets', commands.pullTickets);
+        let generateCode = vscode.commands.registerCommand('extension.generateCode', commands.generateCode);
+        // Register updateTicket and createWorkItems similarly...
+   
+        context.subscriptions.push(pullTickets, generateCode);
+    }
+   
+    function deactivate() {}
+   
+    module.exports = {
+        activate,
+        deactivate
+    };
+   
 
-   ```python
-   # Example modification in generate_code.py
-   import sys
-   # Inside main
-   ticket_id = sys.argv[1]
-   # Fetch ticket details using ticket_id
-   ```
+                                                                       d. Enhance User Experience
 
-#### **d. Handle Authentication Securely**
+ 1 Display Outputs Effectively:
+    • Use VS Code UI elements like information messages, warning messages, and text editors to display outputs.
+    • For example, display generated code in a new editor window.
+ 2 Provide Feedback and Progress Indicators:
+    • Use vscode.window.withProgress to show progress during long-running operations.
+    • Inform the user when operations start and complete.
 
-- **Store Sensitive Information Securely:**
-  - Use environment variables or a secure storage mechanism instead of hardcoding tokens.
-  
-    ```python
-    import os
-    PERSONAL_ACCESS_TOKEN = os.environ.get('AZURE_DEVOPS_PAT')
-    ```
+                                                                     e. Secure Sensitive Information
 
-- **Configure the Extension to Set Environment Variables:**
-  - Use VS Code's `env` options or prompt the user to input tokens securely.
+ 1 Use Environment Variables:
+    • Store API keys and tokens in environment variables rather than hardcoding them.
+    • Encourage users to set these variables in their system or use a .env file (make sure it's excluded from version control).
+ 2 Update .gitignore:
+   
+    # Sensitive configuration files
+    python/azure_config.py
+    python/openai_config.py
+   
+    # Environment files
+    .env
+   
+ 3 Provide Setup Instructions:
+    • Update README.md with instructions on how to set up environment variables and configure the extension.
 
-#### **e. Integrate LLM Responsibly**
+                                                                   f. Test and Validate Functionality
 
-- **API Key Management:**
-  - Store OpenAI API keys securely using environment variables.
-- **Error Handling:**
-  - Add exception handling in Python scripts to manage API errors gracefully.
-- **Response Validation:**
-  - Validate and sanitize LLM outputs before using them to prevent code injection or unintended consequences.
+ 1 Update test/extension.test.js:
+    • Add tests for each command to ensure they are registered and functioning.
+    • Use mocking or stubs to simulate script execution where appropriate.
+   
+    // test/extension.test.js
+    const assert = require('assert');
+    const vscode = require('vscode');
+    const commands = require('../src/commands');
+   
+    suite('Extension Test Suite', () => {
+        vscode.window.showInformationMessage('Start all tests.');
+   
+        test('Pull Tickets Command', () => {
+            assert.ok(commands.pullTickets, 'pullTickets command exists');
+        });
+   
+        test('Generate Code Command', () => {
+            assert.ok(commands.generateCode, 'generateCode command exists');
+        });
+   
+        // Add tests for updateTicket and createWorkItems...
+    });
+   
+ 2 Manual Testing:
+    • Run the extension in a development environment and manually test each command.
+    • Verify that error handling works as expected and outputs are correct.
 
-### **3. Additional Considerations**
+                                                                    g. Documentation and Maintenance
 
-- **Testing and Debugging:**
-  - Test each component independently before integrating.
-  - Use logging in Python scripts to track execution flow and errors.
+ 1 Update README.md:
+    • Provide clear instructions on installation, setup, and usage of the extension.
+    • Include details on configuring environment variables and dependencies.
+ 2 Maintain CHANGELOG.md:
+    • Document changes, new features, and fixes with each update.
+ 3 Create CONTRIBUTING.md (Optional):
+    • If the project will have contributors, provide guidelines for contributing, coding standards, and how to submit issues or pull requests.
 
-- **Performance Optimization:**
-  - Consider setting up a Python server using `Flask` or `FastAPI` for persistent communication if script startup times become an issue.
-  
-- **Enhancing User Experience:**
-  - Use VS Code's UI elements (like status bars, notifications, input boxes) to create a smooth user interface.
-  
-  ```javascript
-  vscode.window.showInformationMessage('Tickets pulled successfully.');
-  ```
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                     3. Updated Directory Structure
 
-- **Extensibility:**
-  - Design the system to allow for additional features in the future, such as support for multiple LLM providers or integration with other services.
 
----
+ ado-ai/
+ ├── .vscode/
+ │   ├── extensions.json
+ │   ├── launch.json
+ ├── docs/
+ │   ├── plan.md          # This file
+ ├── src/
+ │   ├── extension.js
+ │   ├── commands/
+ │   │   └── index.js
+ │   └── services/
+ │       └── azureDevOps.js
+ ├── python/
+ │   ├── create_work_items.py
+ │   ├── generate_code.py
+ │   ├── pull_tickets.py
+ │   ├── update_ticket.py
+ │   ├── requirements.txt
+ │   ├── azure_config.py      # Excluded from version control
+ │   └── openai_config.py     # Excluded from version control
+ ├── test/
+ │   └── extension.test.js
+ ├── .gitignore
+ ├── .vscodeignore
+ ├── CHANGELOG.md
+ ├── LICENSE
+ ├── README.md
+ ├── package.json
+ ├── package-lock.json
+ ├── LICENSE
+ ├── README.md
+ ├── package.json
+ ├── package-lock.json
 
-### **4. Summary of Actions**
 
-- **Set up VS Code extension commands to interface with Python scripts.**
-- **Develop Python scripts for each functionality: pulling tickets, code generation, ticket updates, and work item creation.**
-- **Establish secure authentication with Azure DevOps and the LLM API.**
-- **Ensure seamless communication between the extension and the Python backend.**
-- **Implement robust error handling and user feedback mechanisms.**
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                          4. Summary of Actions
 
-# Directory structure
-ado-ai/
-    ├── .vscode/
-    │   ├── extensions.json
-    │   ├── launch.json
-    ├── docs/
-    │   ├── plan.md
-    ├── src/
-    │   ├── extension.js
-    │   └── python/
-    │       ├── azure_config.py
-    │       ├── create_work_items.py
-    │       ├── generate_code.py
-    │       ├── pull_tickets.py
-    │       └── update_ticket.py
-    ├── test/
-    │   ├── extension.test.js
-    │   └── index.js
-    ├── .gitignore
-    ├── .vscodeignore
-    ├── CHANGELOG.md
-    ├── LICENSE
-    ├── README.md
-    ├── requirements.txt
-    ├── package.json
-    ├── package-lock.json
-    ├── jsconfig.json
+ • Implement Python backend scripts with necessary functionality and secure configuration.
+ • Implement Python backend scripts with necessary functionality and secure configuration.
+ • Integrate the VS Code extension commands with the Python scripts, ensuring proper input/output handling.
+ • Enhance the user experience with appropriate feedback and UI elements.
+ • Secure your application by properly handling sensitive information and updating .gitignore.
+ • Test commands thoroughly and update tests to cover new functionality.
+ • Update documentation (README.md, CHANGELOG.md, and this plan.md) to reflect changes and provide guidance.
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                              5. Next Steps
+
+ • Proceed to implement the Python scripts, ensuring each functions correctly when run independently.
+ • Integrate the scripts with your VS Code extension commands, handling inputs and outputs appropriately.
+ • Test each command thoroughly within the extension to ensure seamless operation.
+ • Enhance the user interface by providing informative messages and handling errors gracefully.
+ • Maintain and update documentation as you make progress, keeping all project stakeholders informed.
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Feel free to reach out if you need further assistance or clarification on any of these steps.
