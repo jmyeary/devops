@@ -1,10 +1,21 @@
+# Node modules
+node_modules/
+
+# Python virtual environment
+python/venv/
+
+# Environment variables
 .env
-node_modules
+
+# VS Code files
 .vscode-test/
+
+# Build outputs
 *.vsix
+
+# Aider files
 .aider.llm.history
 .aider.input.history
 cache*
 .aider.conf*
-.aider.chat.history.md
 .aider.chat.history.md
