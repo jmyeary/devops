@@ -7,3 +7,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [Unreleased]
 
 - Initial release
+- Added Azure DevOps integration with Python backend
+- Added OpenAI code generation capabilities
+- Implemented work item management features
+- Added secure configuration handling

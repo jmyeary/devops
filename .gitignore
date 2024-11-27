@@ -13,6 +13,10 @@ python/venv/
 # Build outputs
 *.vsix
 
+# Sensitive configuration files
+python/azure_config.py
+python/openai_config.py
+
 # Aider files
 .aider.llm.history
 .aider.input.history
@@ -26,4 +30,3 @@ node_modules/
 dist/
 out/
 *.log
-.env
