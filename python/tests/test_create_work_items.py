@@ -2,8 +2,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 from src.create_work_items import create_work_items, break_down_requirements
 
-@patch('create_work_items.Connection')
-@patch('create_work_items.openai.Completion.create')
+@patch('src.create_work_items.Connection')
+@patch('src.create_work_items.openai.Completion.create')
 def test_create_work_items(mock_completion_create, mock_connection):
     # Mock OpenAI response
     mock_completion_create.return_value.choices = [
