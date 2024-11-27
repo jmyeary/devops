@@ -1,5 +1,8 @@
-.aider*
 .env
 node_modules
 .vscode-test/
 *.vsix
+.aider.llm.history
+.aider.input.history
+cache*
+.aider.conf*
