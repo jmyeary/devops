@@ -1,0 +1,52 @@
+{
+  "name": "ado-ai",
+  "displayName": "ado-ai",
+  "description": "An automated AI powered extension to generate tickets in Azure DevOps",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.pullTickets",
+    "onCommand:extension.generateCode",
+    "onCommand:extension.updateTicket",
+    "onCommand:extension.createWorkItems"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.pullTickets",
+        "title": "Pull My Tickets"
+      },
+      {
+        "command": "extension.generateCode",
+        "title": "Generate Code from Ticket"
+      },
+      {
+        "command": "extension.updateTicket",
+        "title": "Update Ticket with Changes"
+      },
+      {
+        "command": "extension.createWorkItems",
+        "title": "Create Work Items from Requirements"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "eslint": "^9.13.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
