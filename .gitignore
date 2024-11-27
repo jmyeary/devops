@@ -28,6 +28,11 @@ cache*
 .aider.chat.history.md
 .aider*
 
+# Python test files
+__pycache__/
+.pytest_cache/
+.coverage
+
 node_modules/
 dist/
 out/

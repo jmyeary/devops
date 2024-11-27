@@ -2,3 +2,5 @@ azure-devops
 msrest
 openai
 python-dotenv
+pytest
+pytest-mock
