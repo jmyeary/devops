@@ -6,6 +6,7 @@ python/venv/
 
 # Environment variables
 .env
+!.env.template
 
 # VS Code files
 .vscode-test/

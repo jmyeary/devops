@@ -1,3 +1,4 @@
 azure-devops
 msrest
 openai
+python-dotenv

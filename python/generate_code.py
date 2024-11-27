@@ -2,9 +2,15 @@ import sys
 import os
 import openai
 import json
-import openai_config
+from dotenv import load_dotenv
+import os
 
-OPENAI_API_KEY = openai_config.OPENAI_API_KEY
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+if not OPENAI_API_KEY:
+    raise Exception("Missing OpenAI API key")
 
 def generate_code(ticket_description):
     try:

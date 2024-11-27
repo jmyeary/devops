@@ -4,13 +4,18 @@ import openai
 import sys
 import os
 import json
-import azure_config
-import openai_config
+from dotenv import load_dotenv
+import os
 
-ORGANIZATION_URL = azure_config.ORGANIZATION_URL
-PERSONAL_ACCESS_TOKEN = azure_config.PERSONAL_ACCESS_TOKEN
-OPENAI_API_KEY = openai_config.OPENAI_API_KEY
-PROJECT_NAME = azure_config.PROJECT_NAME
+load_dotenv()
+
+ORGANIZATION_URL = os.getenv('ORGANIZATION_URL')
+PERSONAL_ACCESS_TOKEN = os.getenv('PERSONAL_ACCESS_TOKEN')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+PROJECT_NAME = os.getenv('PROJECT_NAME')
+
+if not all([ORGANIZATION_URL, PERSONAL_ACCESS_TOKEN, OPENAI_API_KEY, PROJECT_NAME]):
+    raise Exception("Missing required environment variables")
 
 def break_down_requirements(requirements):
     try:

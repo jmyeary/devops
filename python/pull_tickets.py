@@ -3,10 +3,16 @@ from msrest.authentication import BasicAuthentication
 import os
 import json
 import sys
-import azure_config
+from dotenv import load_dotenv
+import os
 
-ORGANIZATION_URL = azure_config.ORGANIZATION_URL
-PERSONAL_ACCESS_TOKEN = azure_config.PERSONAL_ACCESS_TOKEN
+load_dotenv()
+
+ORGANIZATION_URL = os.getenv('ORGANIZATION_URL')
+PERSONAL_ACCESS_TOKEN = os.getenv('PERSONAL_ACCESS_TOKEN')
+
+if not all([ORGANIZATION_URL, PERSONAL_ACCESS_TOKEN]):
+    raise Exception("Missing required environment variables")
 
 def get_my_work_items():
     try:
