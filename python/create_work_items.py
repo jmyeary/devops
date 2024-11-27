@@ -84,7 +84,7 @@ if __name__ == "__main__":
         sys.exit(1)
         
     requirements = json.loads(sys.argv[1])
-    create_work_items(requirements)
+    items = create_work_items(requirements, PROJECT_NAME)
     if items:
         print(json.dumps(items))
     else:
