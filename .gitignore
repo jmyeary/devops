@@ -16,6 +16,7 @@ python/venv/
 # Sensitive configuration files
 python/azure_config.py
 python/openai_config.py
+python/config/*.py
 
 # Aider files
 .aider.llm.history
