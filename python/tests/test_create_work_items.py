@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from create_work_items import create_work_items, break_down_requirements
+from src.create_work_items import create_work_items, break_down_requirements
 
 @patch('create_work_items.Connection')
 @patch('create_work_items.openai.Completion.create')
