@@ -1,9 +1,12 @@
 from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 import os
+import json
+import sys
+import azure_config
 
-ORGANIZATION_URL = os.getenv('AZURE_DEVOPS_ORGANIZATION_URL')
-PERSONAL_ACCESS_TOKEN = os.getenv('AZURE_DEVOPS_PAT')
+ORGANIZATION_URL = azure_config.ORGANIZATION_URL
+PERSONAL_ACCESS_TOKEN = azure_config.PERSONAL_ACCESS_TOKEN
 
 def get_my_work_items():
     try:
@@ -12,7 +15,7 @@ def get_my_work_items():
         wit_client = connection.clients.get_work_item_tracking_client()
         
         # Query to get work items assigned to current user
-        query = "SELECT [System.Id], [System.Title] FROM WorkItems WHERE [System.AssignedTo] = @Me"
+        query = "SELECT [System.Id], [System.Title], [System.State] FROM WorkItems WHERE [System.AssignedTo] = @Me AND [System.State] <> 'Closed'"
         results = wit_client.query_by_wiql({"query": query}).work_items
         
         # Get full work item details

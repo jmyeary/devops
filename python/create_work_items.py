@@ -4,10 +4,13 @@ import openai
 import sys
 import os
 import json
+import azure_config
+import openai_config
 
-ORGANIZATION_URL = os.getenv('AZURE_DEVOPS_ORGANIZATION_URL')
-PERSONAL_ACCESS_TOKEN = os.getenv('AZURE_DEVOPS_PAT')
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+ORGANIZATION_URL = azure_config.ORGANIZATION_URL
+PERSONAL_ACCESS_TOKEN = azure_config.PERSONAL_ACCESS_TOKEN
+OPENAI_API_KEY = openai_config.OPENAI_API_KEY
+PROJECT_NAME = azure_config.PROJECT_NAME
 
 def break_down_requirements(requirements):
     try:
@@ -71,14 +74,12 @@ def create_work_items(requirements, project_name):
         return []
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: create_work_items.py <requirements> <project_name>")
+    if len(sys.argv) < 2:
+        print("Usage: create_work_items.py <requirements>")
         sys.exit(1)
         
     requirements = json.loads(sys.argv[1])
-    project_name = sys.argv[2]
-    
-    items = create_work_items(requirements, project_name)
+    create_work_items(requirements)
     if items:
         print(json.dumps(items))
     else:

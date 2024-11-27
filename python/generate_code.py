@@ -2,8 +2,9 @@ import sys
 import os
 import openai
 import json
+import openai_config
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = openai_config.OPENAI_API_KEY
 
 def generate_code(ticket_description):
     try:
