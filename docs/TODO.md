@@ -32,7 +32,6 @@ We have developed an initial version of the "ado-ai" VSCode extension with the f
     - ✓ `test_generate_code.py` - Tests code generation and error handling
     - ✓ `test_pull_tickets.py` - Tests work item retrieval
     - ✓ `test_update_ticket.py` - Tests ticket updates
-    - [ ] Complete `test_create_work_items.py`
   - [ ] Implement unit tests for JavaScript commands.
 - [ ] **Integration Testing:**
   - [ ] Test end-to-end workflows between the VSCode extension and Python backend.
