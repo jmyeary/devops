@@ -38,4 +38,4 @@ dist/
 out/
 *.log
 
-python\tests\conftest.py
+python/tests/conftest.py
