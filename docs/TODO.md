@@ -27,11 +27,18 @@ We have developed an initial version of the "ado-ai" VSCode extension with the f
 
 **Goal:** Ensure all existing functionalities are tested and working as expected.
 
-- [ ] **Unit Testing:**
-  - [ ] Write unit tests for all Python scripts in `python/tests/`.
+- [x] **Unit Testing:**
+  - [x] Write unit tests for all Python scripts in `python/tests/`:
+    - ✓ `test_generate_code.py` - Tests code generation and error handling
+    - ✓ `test_pull_tickets.py` - Tests work item retrieval
+    - ✓ `test_update_ticket.py` - Tests ticket updates
+    - [ ] Complete `test_create_work_items.py`
   - [ ] Implement unit tests for JavaScript commands.
 - [ ] **Integration Testing:**
   - [ ] Test end-to-end workflows between the VSCode extension and Python backend.
+- [x] **Test Configuration:**
+  - [x] Set up `conftest.py` with environment variable mocking
+  - [x] Configure pytest test discovery
 - [ ] **Continuous Integration Setup:**
   - [ ] Configure CI pipeline to run tests automatically.
 
