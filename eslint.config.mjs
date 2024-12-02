@@ -2,10 +2,12 @@ import globals from "globals";
 
 export default [{
     ignores: [
-        "**/node_modules/**",
-        "**/.venv/**",
-        "**/dist/**",
-        "**/build/**"
+        "node_modules",
+        ".venv",
+        "dist",
+        "build",
+        "**/*.html",
+        "**/*.css"
     ],
     files: ["**/*.js"],
     languageOptions: {

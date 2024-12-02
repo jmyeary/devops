@@ -2,8 +2,10 @@ const assert = require('assert');
 const vscode = require('vscode');
 const azureDevOps = require('../src/services/azureDevOps');
 
-suite('Extension Test Suite', () => {
-    vscode.window.showInformationMessage('Start all tests.');
+describe('Extension Test Suite', () => {
+    beforeAll(() => {
+        vscode.window.showInformationMessage('Start all tests.');
+    });
 
     test('AzureDevOps Service - Pull Tickets', async () => {
         try {
