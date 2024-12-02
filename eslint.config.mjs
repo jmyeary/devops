@@ -7,6 +7,12 @@ export default [{
             ...globals.commonjs,
             ...globals.node,
             ...globals.mocha,
+            jest: true,
+            expect: true,
+            describe: true,
+            it: true,
+            beforeEach: true,
+            afterEach: true,
         },
 
         ecmaVersion: 2022,

@@ -9,7 +9,7 @@ suite('Extension Test Suite', () => {
         try {
             await azureDevOps.pullTickets();
             assert.ok(true, 'Tickets pulled successfully');
-        } catch (error) {
+        } catch {
             assert.fail('Should not throw error');
         }
     });

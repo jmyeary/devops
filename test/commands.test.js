@@ -1,6 +1,5 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
-const path = require('path');
 const commands = require('../src/commands');
 
 // Mock vscode and child_process
