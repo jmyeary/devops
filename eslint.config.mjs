@@ -18,12 +18,6 @@ export default [{
         ecmaVersion: 2022,
         sourceType: "module",
     },
-    env: {
-        browser: true,
-        node: true,
-        jest: true,
-        es2022: true
-    },
     rules: {
         "no-const-assign": "error",
         "no-this-before-super": "warn",
