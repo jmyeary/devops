@@ -1,7 +1,7 @@
 import globals from "globals";
 
 export default [{
-    ignorePatterns: [
+    ignores: [
         "**/node_modules/**",
         "**/.venv/**",
         "**/dist/**",
